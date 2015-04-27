@@ -1,4 +1,6 @@
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -18,11 +20,15 @@ public class Main{
 	private static int changes;
     private static Map <String, Date> updates = new HashMap<>();
     private final static int sleepingTime = 15000;
+    /**
+     * Path for file
+     */
+    private final static String path = "D:/textdatei.txt";
 	
 	public static void main(String[] args){
 		while(true){
 			createNewReview();
-			System.out.println("------------------------------");
+			writeFile();
 			System.out.println(changes);
 			try {
 				Thread.sleep(sleepingTime);
@@ -57,9 +63,9 @@ public class Main{
 	}
 	
 	
-	public static void parseString(String string){
-	    String [] foo = string.split("<item>");
-	    for (String s: foo){
+	public static void parseSubstring(String string){
+	    String [] items = string.split("<item>");
+	    for (String s: items){
 	    	String title = parseTitle(s);
 	    	if (!title.contains("Wikidata  - Recent changes")){
 		    	Date date = parseTime(s);
@@ -73,8 +79,6 @@ public class Main{
 		    	}
 	    	}
 	    }
-
-	    System.out.println("---------------------------------------------------------");
 		
 	}
 	
@@ -87,7 +91,7 @@ public class Main{
     	return ret;
 	}
 	
-	
+
 	public static Date parseTime(String substring){
 		String startString = "<pubDate>";
 		String endString = "</pubDate>";
@@ -105,16 +109,47 @@ public class Main{
     	return date;
 	}
 	
+	/**
+	 * starts new request for changes
+	 */
+	
 	public static void createNewReview(){
 		changes = 0;
 		String rssFeed = getRSSFeed();
 		//System.out.println(string);
-		parseString(rssFeed);
+		parseSubstring(rssFeed);
 	}
+	
+	/**
+	 * adds update to Map and increments changes
+	 * @param title
+	 * @param date
+	 */
 	
 	public static void addUpdate(String title, Date date){
     	updates.put(title, date);
-    	System.out.println(title + " | " + date);
     	changes++;
 	}
+	
+	
+	/**
+	 * writes changes to File
+	 */
+	
+	public static void writeFile(){
+		File file = new File(path);
+		try {
+			FileWriter fw = new FileWriter(file, false);
+			for (String s: updates.keySet()){
+				fw.write(s + ", " + updates.get(s));
+				fw.write(System.getProperty("line.separator"));
+			}
+			fw.flush();
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }
