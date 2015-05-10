@@ -19,7 +19,7 @@ public class Main{
 	private final static String urlString = "http://www.wikidata.org/w/api.php?action=feedrecentchanges&format=json&feedformat=rss";
 	private static int changes;
     private static Map <String, Date> updates = new HashMap<>();
-    private final static int sleepingTime = 15000;
+    private final static int sleepingTime = 30000;
     /**
      * Path for file
      */
@@ -70,7 +70,7 @@ public class Main{
 	    	if (!title.contains("Wikidata  - Recent changes")){
 		    	Date date = parseTime(s);
 		    	if (updates.containsKey(title)){
-		    		if (!updates.get(title).equals(date)){
+		    		if (!updates.get(title).equals(date) && updates.get(title).before(date)){
 		    			addUpdate(title,date);
 		    		}
 		    	}
@@ -115,9 +115,8 @@ public class Main{
 	
 	public static void createNewReview(){
 		changes = 0;
-		String rssFeed = getRSSFeed();
 		//System.out.println(string);
-		parseSubstring(rssFeed);
+		parseSubstring(getRSSFeed());
 	}
 	
 	/**
